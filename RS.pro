@@ -1,5 +1,4 @@
-QT       += core gui network
-
+QT       += core gui network widgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -9,16 +8,35 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    jsonexchanger.cpp \
+    common/jsonexchanger.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    moduleexchanger.cpp \
+    framelesswindow/framelesswindow.cpp \
+    framelesswindow/windowdragger.cpp \
+    DarkStyle.cpp
 
 HEADERS += \
-    jsonexchanger.h \
-    mainwindow.h
+    common/jsonexchanger.h \
+    mainwindow.h \
+    moduleexchanger.h \
+    framelesswindow/framelesswindow.h \
+    framelesswindow/windowdragger.h \
+    DarkStyle.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    framelesswindow/framelesswindow.ui
+
+DEFINES += HDCAM DEPTHCAM THERMALCAM
+
+INCLUDEPATH += \
+    common/ \
+    framelesswindow
+
+RESOURCES += \
+    darkstyle.qrc \
+    framelesswindow.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
