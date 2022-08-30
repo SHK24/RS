@@ -6,7 +6,7 @@
 #include <QTimer>
 #include <QScreen>
 
-#include "jsonexchanger.h"
+#include "moduleexchanger.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -22,10 +22,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_setHDcamAddr_clicked();
-
-    //Get Frames Slots
-    void on_hdcam_responce_received(QJsonObject jsonData);
 
     //Errors slots
     void on_hdCamError(QString error);
@@ -38,27 +34,40 @@ private slots:
 
     void hdcam_connectionWatchDogHandler();
 
-    void on_hdcam_connect_clicked();
-    void hdcam_readyRead();
-
     void on_hdcam_resolutionList_currentTextChanged(const QString &arg1);
+
+    void on_hdcam_connect_clicked(bool checked);
+
+    void on_depthcam_connect_clicked(bool checked);
+
+    //HDCAM Get frames and messages slots
+    void hdcam_frameReady(QByteArray frame);
+    void on_hdcam_response_ready(QJsonObject jsonData);
+
+    //DEPTHCAM Get frames and messages slots
+    void depthcam_frameReady(QByteArray frame);
+    void on_depthcam_response_ready(QJsonObject jsonData);
+
+    void on_depthcam_address_editingFinished();
 
 private:
     Ui::MainWindow *ui;
-    JsonExchanger * hdCamExchanger;    
+
+    ModuleExchanger * hdcamExchanger;
+    ModuleExchanger * depthcamExchanger;
+
     QSettings * settings;
 
     //HDCAM
-    QTimer hdcamTimer, depthcamTimer;
-    QTimer watchdogTimer;
-    QTcpSocket  _socket;
     QByteArray imgBuffer;
     uchar imgTmp[640*480];
 
     bool hdcamIsConnected = false;
-    bool markerFound = false;
-    unsigned int expectedSize;
-    int currentWidth, currentHeight;
+
+    QTimer faceCountRequestTimer;
+    QTimer sceletonCountRequestTimer;
+
+    bool depthCamConnected;
 
     //Photocam
     //QCamera * camera;
@@ -67,7 +76,8 @@ private:
 
 
     //Requests functions
-    void hdcam_requestFaces();
+    void hdcam_faceCountRequest();
+    void depthcam_sceletonCountRequest();
 
     //Disconnect functions
     void disconnectHdCamHandlers();

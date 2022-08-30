@@ -11,6 +11,9 @@ MainWindow::MainWindow(QWidget *parent)
     QRect  screenGeometry = screen->geometry();
 
     int screenWidth = screenGeometry.width();
+    int screenHeight = screenGeometry.height();
+
+    depthCamConnected = false;
 
 //    //Open photocam
 //    const QList<QCameraDevice> cameras = QMediaDevices::videoInputs();
@@ -88,13 +91,23 @@ MainWindow::MainWindow(QWidget *parent)
     ui->thermalcam_view->setMinimumWidth(screenWidth * 0.3);
     ui->thermalcam_view->setMaximumWidth(screenWidth * 0.3);
 
+//    ui->map_main_view->setMinimumWidth(screenWidth * 0.3);
+//    ui->map_main_view->setMaximumWidth(screenWidth * 0.3);
 
-//    QSize maxResolution(0,0);
-//    for(auto resolution : camera->cameraDevice().photoResolutions()) {
-//        if((resolution.width() > maxResolution.width()) && (resolution.width() > maxResolution.width()))
-//            maxResolution.setWidth(resolution.width());
-//            maxResolution.setHeight(resolution.height());
-//    }
+    ui->hdcam_main_view->setMinimumWidth(screenWidth * 0.3);
+    ui->hdcam_main_view->setMaximumWidth(screenWidth * 0.3);
+    ui->hdcam_main_view->setMinimumHeight(screenHeight * 0.3);
+    ui->hdcam_main_view->setMaximumHeight(screenHeight * 0.3);
+
+    ui->depthcam_main_view->setMinimumWidth(screenWidth * 0.3);
+    ui->depthcam_main_view->setMaximumWidth(screenWidth * 0.3);
+    ui->depthcam_main_view->setMinimumHeight(screenHeight * 0.3);
+    ui->depthcam_main_view->setMaximumHeight(screenHeight * 0.3);
+
+    ui->thermalcam_main_view->setMinimumWidth(screenWidth * 0.3);
+    ui->thermalcam_main_view->setMaximumWidth(screenWidth * 0.3);
+    ui->thermalcam_main_view->setMinimumHeight(screenHeight * 0.3);
+    ui->thermalcam_main_view->setMaximumHeight(screenHeight * 0.3);
 
     //Load settings
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -102,6 +115,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->hdcam_address->setText(settings->value("HD_CAM_ADDRESS", "http://127.0.0.1:8080").toString());
     ui->hdcam_resolutionList->setCurrentIndex(settings->value("HD_CAM_RESOLUTION", 0).toInt());
     ui->hdcam_framerate->setCurrentIndex(settings->value("HD_CAM_FRAMERATE", 0).toInt());
+
+    ui->depthcam_address->setText(settings->value("DEPTH_CAM_ADDRESS", "http://127.0.0.1:8081").toString());
 }
 
 MainWindow::~MainWindow()
@@ -109,59 +124,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//UI Handlers
 
-void MainWindow::on_setHDcamAddr_clicked()
-{
-    QStringList addressParts = ui->hdcam_address->text().split(':');
-
-    QString ip = addressParts[0] + ':' + addressParts[1];
-    int port = addressParts[2].toInt();
-
-    addLog("INFO", "Trying connection to HDCAM...");
-
-    //Setting of watchdog timer
-    connect(&watchdogTimer, &QTimer::timeout, this, &MainWindow::hdcam_connectionWatchDogHandler);
-    watchdogTimer.setSingleShot(true);
-    watchdogTimer.start(1000);
-
-    //Start HDCAM http requests
-
-    hdCamExchanger = new JsonExchanger(ip, port);
-    connect(hdCamExchanger, &JsonExchanger::dataReady, this, &MainWindow::on_hdcam_responce_received);
-    connect(&hdcamTimer, &QTimer::timeout, this, &MainWindow::hdcam_requestFaces);
-
-    //hdCamExchanger->request("get", "status");
-    hdCamExchanger->request("get", "modes");
-    //hdcamTimer.singleShot(1000, this, &MainWindow::hdcam_requestFaces);
-
-      //Start HDCAM frames requests
-      _socket.connectToHost(QHostAddress("127.0.0.1"), 65433);
-      connect(&_socket, SIGNAL(readyRead()), this, SLOT(hdcam_readyRead()));
-      //_socket.write(QByteArray(3, 'A'));
-}
-
-void MainWindow::on_hdcam_responce_received(QJsonObject jsonData) {
+void MainWindow::on_hdcam_response_ready(QJsonObject jsonData) {
 
     QByteArray txt = jsonData["data"].toString().toUtf8();
 
     //Set diod color - green
-    ui->hdcam_connected_diod->setStyleSheet("background-color: rgb(63, 255, 15);border-radius: 25px;");
-
-    if(hdcamIsConnected == false) {
-        addLog("INFO", "Connection OK!");
-        hdcamIsConnected = true;
-        watchdogTimer.stop();
-    }
 
     if(jsonData["entity"].toString() == "status") {
-        currentWidth = jsonData["video_mode"].toArray()[0].toInt();
-        currentHeight = jsonData["video_mode"].toArray()[1].toInt();
-        hdCamExchanger->request("get", "modes");
 
-        addLog("INFO", "Current videomode is " + QString::number(currentWidth) + " " + QString::number(currentHeight));
+        addLog("INFO", "HDCAM Connection - OK!");
+
+        ui->hdcam_connected_diod->setStyleSheet("background-color: rgb(63, 255, 15);border-radius: 25px;");
+
+        int width = jsonData["video_mode"].toArray()[0].toInt();
+        int height = jsonData["video_mode"].toArray()[1].toInt();
+        hdcamExchanger->request("get", "modes");
+
+        addLog("INFO", "Current videomode is " + QString::number(width) + " " + QString::number(height));
     }
 
     if(jsonData["entity"].toString() == "modes") {
+
+        disconnect(ui->hdcam_resolutionList, &QComboBox::currentTextChanged, this, &MainWindow::on_hdcam_resolutionList_currentTextChanged);
+
         for(auto mode : jsonData["modes"].toArray()) {
 
             ui->hdcam_resolutionList->addItem(QString::number(mode.toArray()[0].toInt())+"x"+QString::number(mode.toArray()[1].toInt()));
@@ -170,15 +157,43 @@ void MainWindow::on_hdcam_responce_received(QJsonObject jsonData) {
         connect(ui->hdcam_resolutionList, &QComboBox::currentTextChanged, this, &MainWindow::on_hdcam_resolutionList_currentTextChanged);
 
         addLog("INFO", "Receiving supported modes - OK");
-        //hdcamTimer.singleShot(40, this, &MainWindow::hdcam_requestFaces);
 
-        _socket.connectToHost(QHostAddress("127.0.0.1"), 65433);
-        connect(&_socket, SIGNAL(readyRead()), this, SLOT(hdcam_readyRead()));
-        _socket.write(QByteArray(3, 'A'));
+        hdcamExchanger->tcpConnect();
+        faceCountRequestTimer.singleShot(40, this, &MainWindow::hdcam_faceCountRequest);
     }
 
     if(jsonData["entity"].toString() == "face_count") {
         ui->face_count_value->setText(jsonData["face_count"].toString());
+    }
+}
+
+void MainWindow::depthcam_frameReady(QByteArray frame) {
+    QPixmap mpixmap;
+
+    qDebug() << "Received DEPTHCAM frame";
+
+    unsigned int width = *(unsigned short*)frame.data();
+    unsigned int height = *(unsigned short*)(frame.data() + 2);
+
+    const uchar * imgPtr = (uchar*)(frame.data() + 4);
+
+    QImage image(imgPtr, width, height, QImage::Format::Format_BGR888);
+
+    ui->depthcam_view->setPixmap(QPixmap::fromImage(image));
+    ui->depthcam_main_view->setPixmap(QPixmap::fromImage(image));
+}
+
+void MainWindow::on_depthcam_response_ready(QJsonObject jsonData) {
+
+    ui->depthcam_connected_diod->setStyleSheet("background-color: rgb(63, 255, 15);border-radius: 25px;");
+
+    if(!depthCamConnected) {
+        addLog("INFO", "Depth Cam Connection - OK!");
+        depthCamConnected = true;
+    }
+
+    if(jsonData["entity"].toString() == "sceleton_count") {
+        ui->sceleton_count_value->setText(jsonData["sceleton_count"].toString());
     }
 }
 
@@ -187,11 +202,6 @@ void MainWindow::on_hdCamError(QString error) {
     ui->hdcam_connected_diod->setStyleSheet("background-color: rgb(255, 63, 15);border-radius: 25px;");
     ui->hdcam_view->setStyleSheet("background-color: rgb(0, 0, 0);");
     addLog("ERROR", error);
-
-    hdcamIsConnected = false;
-    hdcamTimer.stop();
-
-    disconnectHdCamHandlers();
 }
 
 
@@ -215,16 +225,20 @@ void MainWindow::hdcam_connectionWatchDogHandler(){
     addLog("ERROR", "HDCam connection error!");
 }
 
-void MainWindow::hdcam_requestFaces(){
-    hdCamExchanger->request("get", "face_count");
-    hdcamTimer.singleShot(40, this, &MainWindow::hdcam_requestFaces);
+void MainWindow::hdcam_faceCountRequest(){
+    hdcamExchanger->request("get", "face_count");
+    faceCountRequestTimer.singleShot(40, this, &MainWindow::hdcam_faceCountRequest);
+}
+
+void MainWindow::depthcam_sceletonCountRequest() {
+    depthcamExchanger->request("get", "sceleton_count");
+    sceletonCountRequestTimer.singleShot(40, this, &MainWindow::depthcam_sceletonCountRequest);
 }
 
 void MainWindow::disconnectHdCamHandlers() {
-    disconnect(hdCamExchanger, &JsonExchanger::dataReady, this, &MainWindow::on_hdcam_responce_received);
-    disconnect(&hdcamTimer, &QTimer::timeout, this, &MainWindow::hdcam_requestFaces);
-
-    delete(hdCamExchanger);
+    disconnect(hdcamExchanger, &ModuleExchanger::frameReady, this, &MainWindow::hdcam_frameReady);
+    disconnect(hdcamExchanger, &ModuleExchanger::responseReady, this, &MainWindow::on_hdcam_response_ready);
+    disconnect(hdcamExchanger, &ModuleExchanger::error, this, &MainWindow::on_hdCamError);
 }
 
 void MainWindow::addLog(QString level, QString message){
@@ -249,101 +263,89 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
     ui->thermalcam_view->setMinimumWidth(screenWidth * 0.3);
     ui->thermalcam_view->setMaximumWidth(screenWidth * 0.3);
-
 }
 
 
-void MainWindow::on_hdcam_connect_clicked()
-{
-    QStringList addressParts = ui->hdcam_address->text().split(':');
-
-    QString ip = addressParts[0] + ':' + addressParts[1];
-    int port = addressParts[2].toInt();
-
-    addLog("INFO", "Trying connection to HDCAM...");
-
-    //Setting of watchdog timer
-    //connect(&watchdogTimer, &QTimer::timeout, this, &MainWindow::hdcam_connectionWatchDogHandler);
-    //watchdogTimer.setSingleShot(true);
-    //watchdogTimer.start(1000);
-
-    //Start rhdcam frames requests
-    hdCamExchanger = new JsonExchanger(ip, port);
-    connect(hdCamExchanger, &JsonExchanger::dataReady, this, &MainWindow::on_hdcam_responce_received);
-    disconnect(ui->hdcam_resolutionList, &QComboBox::currentTextChanged, this, &MainWindow::on_hdcam_resolutionList_currentTextChanged);
-
-    hdCamExchanger->request("get", "status");
-}
-
-void MainWindow::hdcam_readyRead() {
-    QByteArray data = _socket.readAll();
-
-    imgBuffer.append(data);
+void MainWindow::hdcam_frameReady(QByteArray frame) {
 
     QPixmap mpixmap;
 
-    if(!markerFound) {
+    qDebug() << "Received HDCAM frame";
 
-        unsigned int * marker = nullptr;
-        unsigned int markerPos = 0;
-        expectedSize = 0;
+    unsigned int width = *(unsigned short*)frame.data();
+    unsigned int height = *(unsigned short*)(frame.data() + 2);
 
-        marker = (unsigned int*)imgBuffer.data();
+    const uchar * imgPtr = (uchar*)(frame.data() + 4);
 
-        while(*marker != 0x55AA55AA) {
-            marker = (unsigned int*)imgBuffer.data() + markerPos;
-            markerPos += 4;
+    QImage image(imgPtr, width, height, QImage::Format::Format_BGR888);
 
-            if(markerPos > (unsigned int)imgBuffer.count()) {
-                //imgBuffer.remove(0, markerPos + 4);
-                //_socket.write(QByteArray(3, 'A'));
-                return;
-            }
-        }
+    ui->hdcam_view->setScaledContents( true );
+    ui->hdcam_view->setPixmap(QPixmap::fromImage(image).scaled(ui->hdcam_view->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 
-        imgBuffer.remove(0, markerPos + 4);
-        currentWidth = *(unsigned short*)imgBuffer.data();
-        currentHeight = *(unsigned short*)(imgBuffer.data() + 2);
-        expectedSize = currentWidth * currentHeight * 3;
-
-        markerFound = true;
-        imgBuffer.remove(0, 4);
-    }
-
-    if(imgBuffer.count() < expectedSize)
-        return;
-
-    qDebug() << "Received frame";
-
-    markerFound = false;
-
-    const uchar * imgPtr = (uchar*)imgBuffer.data();
-
-    QImage image(imgPtr, currentWidth, currentHeight, QImage::Format::Format_BGR888);
-
-    ui->hdcam_view->setPixmap(QPixmap::fromImage(image));
-    ui->hdcam_main_view->setPixmap(QPixmap::fromImage(image));
-
-    //ui->hdcam_view->setScaledContents( true );
-    //ui->hdcam_view->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored );
-
-    //ui->hdcam_main_view->setScaledContents( true );
-    //ui->hdcam_main_view->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored );
-
-    int size = imgBuffer.count();
-    imgBuffer.remove(0, expectedSize);
-
-    int size2 = imgBuffer.count();
-    qDebug() << "Request frame";
-    _socket.write(QByteArray(3, 'A'));
-    _socket.flush();
+    ui->hdcam_main_view->setScaledContents( true );
+    ui->hdcam_main_view->setPixmap(QPixmap::fromImage(image).scaled(ui->hdcam_main_view->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 }
 
 
-void MainWindow::on_hdcam_resolutionList_currentTextChanged(const QString &arg1)
+void MainWindow::on_hdcam_resolutionList_currentTextChanged(const QString &arg1) {
+    hdcamExchanger->request("set", "video_mode", arg1);
+}
+
+
+void MainWindow::on_hdcam_connect_clicked(bool checked)
 {
-    hdCamExchanger->request("set", "video_mode", arg1);
-    currentWidth = arg1.split('x')[0].toInt();
-    currentHeight = arg1.split('x')[1].toInt();
+    if(checked) {
+        QStringList addressParts = ui->hdcam_address->text().split(':');
+
+        QString ip = addressParts[0];
+        int port = addressParts[1].toInt();
+
+        addLog("INFO", "Trying to connect to HDCAM...");
+
+        hdcamExchanger = new ModuleExchanger(ip, port, 1234);
+
+        connect(hdcamExchanger, &ModuleExchanger::frameReady, this, &MainWindow::hdcam_frameReady);
+        connect(hdcamExchanger, &ModuleExchanger::responseReady, this, &MainWindow::on_hdcam_response_ready);
+        connect(hdcamExchanger, &ModuleExchanger::error, this, &MainWindow::on_hdCamError);
+        hdcamExchanger->request("get", "status");
+    }
+    else {
+        disconnectHdCamHandlers();
+        delete(hdcamExchanger);
+    }
+}
+
+
+void MainWindow::on_depthcam_connect_clicked(bool checked)
+{
+    if(checked) {
+        QStringList addressParts = ui->depthcam_address->text().split(':');
+
+        QString ip = addressParts[0];
+        int port = addressParts[1].toInt();
+
+        addLog("INFO", "Trying to connect to DepthCam...");
+
+        depthcamExchanger = new ModuleExchanger(ip, port, 1235);
+
+        connect(depthcamExchanger, &ModuleExchanger::frameReady, this, &MainWindow::depthcam_frameReady);
+        connect(depthcamExchanger, &ModuleExchanger::responseReady, this, &MainWindow::on_depthcam_response_ready);
+
+        depthcamExchanger->tcpConnect();
+        faceCountRequestTimer.singleShot(40, this, &MainWindow::depthcam_sceletonCountRequest);
+        //connect(depthcamExchanger, &ModuleExchanger::error, this, &MainWindow::on_hdCamError);
+        //depthcamExchanger->request("get", "status");
+
+
+    }
+    else {
+        disconnectHdCamHandlers();
+        delete(hdcamExchanger);
+    }
+}
+
+
+void MainWindow::on_depthcam_address_editingFinished() {
+    settings->setValue("DEPTH_CAM_ADDRESS", ui->depthcam_address->text());
 }
 

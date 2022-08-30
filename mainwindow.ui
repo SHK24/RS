@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -43,43 +43,13 @@
         <string>Общее</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_11">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_6">
-          <property name="minimumSize">
-           <size>
-            <width>600</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="title">
-           <string>Карта</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_8">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_18">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(0, 0, 0);
-font: 26pt &quot;MS Shell Dlg 2&quot;;
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>MAP VIEW</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
            <string>Обзор камер</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
-           <item row="2" column="0">
+           <item row="3" column="0">
             <widget class="QLabel" name="label_9">
              <property name="maximumSize">
               <size>
@@ -92,35 +62,10 @@ color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>HD Cam:</string>
-             </property>
-            </widget>
+           <item row="8" column="1">
+            <widget class="QDial" name="dial_2"/>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(0, 0, 0);
-font: 26pt &quot;MS Shell Dlg 2&quot;;
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>DEPTHCAM VIEW</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
+           <item row="1" column="0" rowspan="2" colspan="3">
             <widget class="QLabel" name="hdcam_main_view">
              <property name="styleSheet">
               <string notr="true">background-color: rgb(0, 0, 0);
@@ -135,7 +80,165 @@ color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
+           <item row="1" column="3" rowspan="2">
+            <widget class="QLabel" name="thermalcam_main_view">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(0, 0, 0);
+font: 26pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>THERMALCAM VIEW</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3" rowspan="8">
+            <widget class="QGroupBox" name="statuslist">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Состояние</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_12">
+              <item row="1" column="1">
+               <widget class="QLabel" name="sceleton_count_value">
+                <property name="text">
+                 <string>значение</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>Параметр4:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="label_31">
+                <property name="text">
+                 <string>значение</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="label_32">
+                <property name="text">
+                 <string>значение</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="face_count_label">
+                <property name="text">
+                 <string>Обнаруженные лица:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_21">
+                <property name="text">
+                 <string>Параметр3:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="face_count_value">
+                <property name="text">
+                 <string>значение</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>Обнаруженные skeleton:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QDial" name="dial_3"/>
+           </item>
+           <item row="8" column="2">
+            <widget class="QDial" name="dial_5"/>
+           </item>
+           <item row="10" column="2">
+            <widget class="QDial" name="dial_6"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>HD Cam:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <widget class="QDial" name="dial_4"/>
+           </item>
+           <item row="8" column="0">
+            <widget class="QDial" name="dial"/>
+           </item>
+           <item row="11" column="0">
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="7" column="1">
+            <widget class="QLCDNumber" name="lcdNumber_2">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="2">
+            <widget class="QLCDNumber" name="lcdNumber_3">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
             <widget class="QLabel" name="label_10">
              <property name="minimumSize">
               <size>
@@ -154,104 +257,68 @@ color: rgb(255, 255, 255);</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_7">
+           <item row="4" column="0" rowspan="3" colspan="3">
+            <widget class="QLabel" name="depthcam_main_view">
              <property name="styleSheet">
               <string notr="true">background-color: rgb(0, 0, 0);
 font: 26pt &quot;MS Shell Dlg 2&quot;;
 color: rgb(255, 255, 255);</string>
              </property>
              <property name="text">
-              <string>THERMALCAM VIEW</string>
+              <string>DEPTHCAM VIEW</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
+           <item row="7" column="0">
+            <widget class="QLCDNumber" name="lcdNumber">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLCDNumber" name="lcdNumber_4"/>
+           </item>
+           <item row="9" column="1">
+            <widget class="QLCDNumber" name="lcdNumber_5"/>
+           </item>
+           <item row="9" column="2">
+            <widget class="QLCDNumber" name="lcdNumber_6"/>
+           </item>
           </layout>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QGroupBox" name="groupBox_7">
-          <property name="maximumSize">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox_6">
+          <property name="minimumSize">
            <size>
-            <width>16777215</width>
-            <height>16777215</height>
+            <width>600</width>
+            <height>0</height>
            </size>
           </property>
           <property name="title">
-           <string>Состояние</string>
+           <string>Карта</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_12">
+          <layout class="QGridLayout" name="gridLayout_8">
            <item row="0" column="0">
-            <widget class="QLabel" name="face_count_label">
+            <widget class="QLabel" name="map_main_view">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(0, 0, 0);
+font: 26pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+             </property>
              <property name="text">
-              <string>Обнаруженные лица:</string>
+              <string>MAP VIEW</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLabel" name="label_31">
-             <property name="text">
-              <string>значение</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_21">
-             <property name="text">
-              <string>Параметр3:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLabel" name="face_count_value">
-             <property name="text">
-              <string>значение</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_22">
-             <property name="text">
-              <string>Параметр4:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="label_30">
-             <property name="text">
-              <string>значение</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_20">
-             <property name="text">
-              <string>Параметр2:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLabel" name="label_32">
-             <property name="text">
-              <string>значение</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </widget>
@@ -276,7 +343,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_33">
+            <widget class="QLabel" name="map_view">
              <property name="styleSheet">
               <string notr="true">background-color: rgb(0, 0, 0);
 font: 26pt &quot;MS Shell Dlg 2&quot;;
@@ -697,7 +764,10 @@ color: rgb(255, 255, 255);</string>
            <item row="0" column="2">
             <widget class="QPushButton" name="hdcam_connect">
              <property name="text">
-              <string>Применить</string>
+              <string>Connect</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -725,7 +795,10 @@ border-radius: 25px;</string>
            <item row="1" column="2">
             <widget class="QPushButton" name="depthcam_connect">
              <property name="text">
-              <string>Применить</string>
+              <string>Connect</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -753,7 +826,7 @@ border-radius: 25px;</string>
            <item row="2" column="2">
             <widget class="QPushButton" name="thermalcam_connect">
              <property name="text">
-              <string>Применить</string>
+              <string>Connect</string>
              </property>
             </widget>
            </item>
@@ -781,7 +854,7 @@ border-radius: 25px;</string>
            <item row="3" column="2">
             <widget class="QPushButton" name="setSelftestAddr">
              <property name="text">
-              <string>Применить</string>
+              <string>Connect</string>
              </property>
             </widget>
            </item>
@@ -809,7 +882,7 @@ border-radius: 25px;</string>
            <item row="4" column="2">
             <widget class="QPushButton" name="setSelftestAddr_2">
              <property name="text">
-              <string>Применить</string>
+              <string>Connect</string>
              </property>
             </widget>
            </item>

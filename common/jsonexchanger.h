@@ -35,6 +35,8 @@ class JsonExchanger : public QObject
     QNetworkAccessManager qnam;
     QNetworkReply *reply;
 
+    void responseReady();
+
 public:
 
     JsonExchanger();
@@ -48,6 +50,7 @@ public:
     void setIp(const QString &newIp);
     int getPort() const;
     void setPort(int newPort);
+
 signals:
     void dataReady(QJsonObject jsonData);
     void error(QString message);

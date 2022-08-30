@@ -22,6 +22,21 @@ void JsonExchanger::setPort(int newPort)
     port = newPort;
 }
 
+void JsonExchanger::responseReady() {
+    if(reply->error() == QNetworkReply::NoError){
+        QString contents = QString::fromUtf8(reply->readAll());
+        QJsonObject jsonData = this->parse(contents);
+        this->dataReady(jsonData);
+    }
+    else{
+        QString err = reply->errorString();
+        this->error(err);
+    }
+    //reply->deleteLater();
+
+    return;
+}
+
 JsonExchanger::JsonExchanger() {
 
 }
@@ -44,19 +59,20 @@ int JsonExchanger::request(QString type, QString entity, QString value){
     QByteArray data = doc.toJson();
 
     reply = qnam.post(request, data);
+    connect(reply, &QNetworkReply::finished, this, &JsonExchanger::responseReady);
 
-    QObject::connect(reply, &QNetworkReply::finished, [=](){
-        if(reply->error() == QNetworkReply::NoError){
-            QString contents = QString::fromUtf8(reply->readAll());
-            QJsonObject jsonData = this->parse(contents);
-            this->dataReady(jsonData);
-        }
-        else{
-            QString err = reply->errorString();
-            this->error(err);
-        }
-        //reply->deleteLater();
-    });
+//    QObject::connect(reply, &QNetworkReply::finished, [=](){
+//        if(reply->error() == QNetworkReply::NoError){
+//            QString contents = QString::fromUtf8(reply->readAll());
+//            QJsonObject jsonData = this->parse(contents);
+//            this->dataReady(jsonData);
+//        }
+//        else{
+//            QString err = reply->errorString();
+//            this->error(err);
+//        }
+//        //reply->deleteLater();
+//    });
 
     //connect(reply, &QNetworkReply::finished, this, &JsonExchanger::httpFinished);
     //connect(reply, &QIODevice::readyRead, this, &JsonExchanger::httpReadyRead);
